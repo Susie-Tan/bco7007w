@@ -7,24 +7,47 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(rtweet)
 ```
 
-## R Markdown
+## Data import
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+Step 1. collect tweets about coffee
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+# this way takes time, update everytime, search through n=1800 each time
+#if you have retryonratelimit, if it is too much, it is going to take a break - then restarts again
+# leverage load on server - so they pace you out - "can you wait?"
+#coffee_tweets%>%write_csv("coffee_7_10_21.csv") - merge, download and save twitter -just run this line
 
-```{r cars}
-summary(cars)
+```{r eval=FALSE}
+coff_tweets<-search_tweets(
+  q="coffee",
+  n=1800,
+  include_rts = FALSE,
+  lang="en",
+  retryonratelimit = TRUE
+)
+
+coff_tweets%>%
+  select(-hashtags,-symbols,-urls_url)%>%
+  write_csv("coffee_7_10_21.csv")
 ```
 
-## Including Plots
+```{r}
 
-You can also embed plots, for example:
+# look at first 6 observations
+coff_tweets%>%
+  head()
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+# look at structure
+coff_tweets%>%
+  str()
+
+coffee_short <- coff_tweets%>%
+  select(user_id, screen_name, created_at, text, favourites_count,retweet_count)
+
+coffee_short%>%write_csv("coffee_short_7_10_21.csv")
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
